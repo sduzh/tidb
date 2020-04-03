@@ -679,3 +679,18 @@ func (s *testPointGetSuite) TestPointGetWriteLock(c *C) {
 	c.Assert(explain, Matches, ".*num_rpc.*")
 	tk.MustExec("unlock tables")
 }
+
+func (s *testPointGetSuite) TestIssue16028(c *C) {
+	tk := testkit.NewTestKit(c, s.store)
+	tk.MustExec("use test")
+	tk.MustExec("drop table if exists t")
+	tk.MustExec("create table t(pk double unsigned unique)")
+	tk.MustExec("insert into t values(0)")
+	tk.MustQuery("select * from t where pk = -1").Check(testkit.Rows())
+
+	tk.MustExec("use test")
+	tk.MustExec("drop table if exists t")
+	tk.MustExec("create table t(pk float unsigned unique)")
+	tk.MustExec("insert into t values(0)")
+	tk.MustQuery("select * from t where pk = -1").Check(testkit.Rows())
+}
